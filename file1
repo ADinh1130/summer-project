@@ -1,43 +1,38 @@
 import pygame
 import sys
+import subprocess
 
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
-    QApplication,
-    QCheckBox,
-    QComboBox,
-    QDateEdit,
-    QDateTimeEdit,
-    QDial,
-    QDoubleSpinBox,
-    QFontComboBox,
-    QLabel,
-    QLCDNumber,
-    QLineEdit,
-    QMainWindow,
-    QProgressBar,
-    QPushButton,
-    QRadioButton,
-    QSlider,
-    QSpinBox,
-    QTimeEdit,
-    QVBoxLayout,
     QWidget,
+    QMainWindow,
+    QApplication,
+    QPushButton,
+    QVBoxLayout,
 )
 
-# Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Game")
-        button = QPushButton("Press Me!")
-        self.showMaximized()
+        self.setWindowTitle("My App")
+
+        #make button for start
+        button = Start_Button("Press Me!")
+
+        self.setFixedSize(QSize(400, 300))
 
         # Set the central widget of the Window.
         self.setCentralWidget(button)
 
+class Start_Button(QPushButton):
+    def __init__(self, text):
+        super().__init__(text)
+        self.setCheckable(True)
+        self.clicked.connect(self.the_button_was_clicked)
+
+    def the_button_was_clicked(self):
+        subprocess.run('ls')
 
 app = QApplication(sys.argv)
 
