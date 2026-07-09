@@ -1,42 +1,56 @@
 import pygame
-import sys
-import subprocess
 
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import (
-    QWidget,
-    QMainWindow,
-    QApplication,
-    QPushButton,
-    QVBoxLayout,
-)
+# Initialize Pygame
+pygame.init()
+screenxy = pygame.display.get_desktop_sizes()
+screenx = screenxy[0][0]
+screeny = screenxy[0][1] - 40
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+screen = pygame.display.set_mode((screenx,screeny))
+screen.fill((255, 255, 255))
+pygame.display.set_caption("Hello Pygame")
 
-        self.setWindowTitle("My App")
+# Creating a list of different rects
+rectangle_list = [pygame.Rect(50, 100, 500, 200),
+                  pygame.Rect(70, 120, 460, 160),
+                  pygame.Rect(90, 140, 420, 120),
+                  pygame.Rect(110, 160, 380, 80),
+                  pygame.Rect(130, 180, 340, 40)
+                  ]
 
-        #make button for start
-        button = Start_Button("Press Me!")
+# Creating list of different colors
+color_list = [(0,   0,   0),
+              (255, 255, 255),
+              (0,   0, 255),
+              (0, 255,   0),
+              (255,   0,   0)
+              ]
 
-        self.setFixedSize(QSize(400, 300))
 
-        # Set the central widget of the Window.
-        self.setCentralWidget(button)
 
-class Start_Button(QPushButton):
-    def __init__(self, text):
-        super().__init__(text)
-        self.setCheckable(True)
-        self.clicked.connect(self.the_button_was_clicked)
+# Game loop
+running = True
+while running:
+    color_var = 0
 
-    def the_button_was_clicked(self):
-        subprocess.run('ls')
+    # Iterating over the rectangle_list using
+    # for loop
+    for rectangle in rectangle_list:
 
-app = QApplication(sys.argv)
+        # Drawing the rectangle 
+        # using the draw.rect() method
+        pygame.draw.rect(screen, color_list[color_var],
+                        rectangle)
 
-window = MainWindow()
-window.show()
+        # Increasing the value of color_var
+        # by 1 after every iteration
+        color_var += 1
 
-app.exec()
+    # Draws the surface object to the screen.
+    pygame.display.update()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+# Quit Pygame
+pygame.quit()
