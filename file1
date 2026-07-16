@@ -1,56 +1,129 @@
 import pygame
+from wcwidth import center
 
 # Initialize Pygame
 pygame.init()
+
+#get screen dimensions
 screenxy = pygame.display.get_desktop_sizes()
 screenx = screenxy[0][0]
-screeny = screenxy[0][1] - 40
+screeny = screenxy[0][1] - 50
+
 
 screen = pygame.display.set_mode((screenx,screeny))
 screen.fill((255, 255, 255))
 pygame.display.set_caption("Hello Pygame")
 
-# Creating a list of different rects
-rectangle_list = [pygame.Rect(50, 100, 500, 200),
-                  pygame.Rect(70, 120, 460, 160),
-                  pygame.Rect(90, 140, 420, 120),
-                  pygame.Rect(110, 160, 380, 80),
-                  pygame.Rect(130, 180, 340, 40)
-                  ]
+# Creating a list of different lines
+line_start = [(200, 510),
+              (200, 540),
+              (200, 570),
+              (200, 600),
+              (200, 630),
+              (200,510)
+            ]
+                              
+line_end = [(screenx, 510),
+            (screenx, 540),
+            (screenx, 570),
+            (screenx, 600),
+            (screenx, 630),
+            (200,630)
+            ]
 
-# Creating list of different colors
-color_list = [(0,   0,   0),
-              (255, 255, 255),
-              (0,   0, 255),
-              (0, 255,   0),
-              (255,   0,   0)
-              ]
+class quarter_note:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.radius = 15
+        self.color = (0, 0, 0)
+        self.thickness = 0
+        self.start = [x + 13, y]
+        self.end = [x + 13, y - 75]
 
+    def make(self):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
+        pygame.draw.line(screen, self.color, self.start, self.end, 2)
+
+
+class quarter_note_off:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.radius = 15
+        self.color = (0, 0, 0)
+        self.thickness = 0
+        self.start = [x + 13, y]
+        self.end = [x + 13, y - 75]
+
+    def make(self):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
+        pygame.draw.line(screen, self.color, self.start, self.end, 2)
+
+class half_note:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.radius = 15
+        self.color = (0, 0, 0)
+        self.thickness = 0
+        self.start = [x + 13, y]
+        self.end = [x + 13, y - 75]
+
+    def make(self):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
+        pygame.draw.line(screen, self.color, self.start, self.end, 2)
+
+class half_note_off:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.radius = 15
+        self.color = (0, 0, 0)
+        self.thickness = 0
+        self.start = [x + 13, y]
+        self.end = [x + 13, y - 75]
+
+    def make(self):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
+        pygame.draw.line(screen, self.color, self.start, self.end, 2)
 
 
 # Game loop
 running = True
 while running:
-    color_var = 0
+    line_num = 0
 
     # Iterating over the rectangle_list using
     # for loop
-    for rectangle in rectangle_list:
+    for line in line_start:
+        # Drawing the lines 
+        # using the draw.line() method
+        pygame.draw.line(screen,(0,0,0),line_start[line_num], line_end[line_num], 2)
 
-        # Drawing the rectangle 
-        # using the draw.rect() method
-        pygame.draw.rect(screen, color_list[color_var],
-                        rectangle)
-
-        # Increasing the value of color_var
+        # Increasing the value of line_num
         # by 1 after every iteration
-        color_var += 1
-
-    # Draws the surface object to the screen.
+        line_num += 1
+    
+    note = quarter_note(300, 525).make()
+    """
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_w:
+                print("Move the character forwards")
+            elif event.key == pygame.K_s:
+                print("Move the character backwards")
+            elif event.key == pygame.K_a:
+                print("Move the character left")
+            elif event.key == pygame.K_d:
+                print("Move the character right")
+"""
     pygame.display.update()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+
 
 # Quit Pygame
 pygame.quit()
