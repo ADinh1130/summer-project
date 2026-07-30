@@ -1,4 +1,7 @@
 import pygame
+import time
+import threading
+import sys
 from wcwidth import center
 
 # Initialize Pygame
@@ -7,94 +10,191 @@ pygame.init()
 #get screen dimensions
 screenxy = pygame.display.get_desktop_sizes()
 screenx = screenxy[0][0]
-screeny = screenxy[0][1] - 50
+screeny = screenxy[0][1] - 60
 
-
+#making the screen
 screen = pygame.display.set_mode((screenx,screeny))
 screen.fill((255, 255, 255))
-pygame.display.set_caption("Hello Pygame")
+pygame.display.set_caption("Twinkle Twinkle Little Star")
 
-# Creating a list of different lines
-line_start = [(200, 510),
-              (200, 540),
-              (200, 570),
-              (200, 600),
-              (200, 630),
-              (200,510)
+
+# Creating a list of different staves
+line_start = [(200, 510), #f line
+              (200, 540), #d line
+              (200, 570), #b line
+              (200, 600), #g line
+              (200, 630), #e line
             ]
                               
-line_end = [(screenx, 510),
-            (screenx, 540),
-            (screenx, 570),
-            (screenx, 600),
-            (screenx, 630),
-            (200,630)
+line_end = [(screenx, 510), #f line
+            (screenx, 540), #d line
+            (screenx, 570), #b line
+            (screenx, 600), #g line
+            (screenx, 630), #e line
             ]
 
-class quarter_note:
+class quarter_note(pygame.sprite.Sprite):
+    def __init__(self, x, y, key):
+        super().__init__()
+        #hitbox check put scalpha when done
+        #self.image = pygame.Surface([50, 100])
+        #self.image.fill((255,0,0))
+        self.image = pygame.Surface([50,100], pygame.SRCALPHA, 32)
+
+        pygame.draw.circle(self.image, (0, 0, 0), (25, 80), 15, 0)
+        pygame.draw.line(self.image, (0, 0, 0), [38, 80], [38, 5], 2)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        self.key = key
+
+
+class quarter_note_off(pygame.sprite.Sprite):
+    def __init__(self, x, y, key):
+        super().__init__()
+
+        self.image = pygame.Surface([50,100], pygame.SRCALPHA, 32)
+
+        pygame.draw.circle(self.image, (0, 0, 0), (25, 80), 15, 0)
+        pygame.draw.line(self.image, (0, 0, 0), [38, 80], [38, 5], 2)
+        pygame.draw.line(self.image, (0, 0, 0), [0, 80], [50, 80], 2)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        self.key = key
+
+
+class half_note(pygame.sprite.Sprite):
+    def __init__(self, x, y, key):
+        super().__init__()
+
+        self.image = pygame.Surface([50,100], pygame.SRCALPHA, 32)
+
+        pygame.draw.circle(self.image, (0, 0, 0), (25, 80), 15, 5)
+        pygame.draw.line(self.image, (0, 0, 0), [38, 80], [38, 5], 2)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        self.key = key
+
+
+
+class half_note_off(pygame.sprite.Sprite):
+    def __init__(self, x, y, key):
+        super().__init__()
+
+        self.image = pygame.Surface([50,100], pygame.SRCALPHA, 32)
+
+        pygame.draw.circle(self.image, (0, 0, 0), (25, 80), 15, 5)
+        pygame.draw.line(self.image, (0, 0, 0), [38, 80], [38, 5], 2)
+        pygame.draw.line(self.image, (0, 0, 0), [0, 80], [50, 80], 2)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        self.key = key
+
+all_active_note_list = pygame.sprite.Group()
+
+sheet_music = [
+    #because sprite note y is -80 from original staff 
+    quarter_note_off(screenx + 35, 580, "c"),
+    quarter_note_off(screenx + 35, 580, "c"),
+    quarter_note(screenx + 35, 520, "g"),
+    quarter_note(screenx + 35, 520, "g"),
+
+    quarter_note(screenx + 35, 505, "a"),
+    quarter_note(screenx + 35, 505, "a"),
+    half_note(screenx + 35, 520, "g"),
+
+    quarter_note(screenx + 35, 535, "f"),
+    quarter_note(screenx + 35, 535, "f"),
+    quarter_note(screenx + 35, 550, "e"),
+    quarter_note(screenx + 35, 550, "e"),
+
+    quarter_note(screenx + 35, 565, "d"),
+    quarter_note(screenx + 35, 565, "d"),
+    half_note_off(screenx + 35, 580, "c"),
+
+    quarter_note(screenx + 35, 520, "g"),
+    quarter_note(screenx + 35, 520, "g"),
+    quarter_note(screenx + 35, 535, "f"),
+    quarter_note(screenx + 35, 535, "f"),
+
+    quarter_note(screenx + 35, 550, "e"),
+    quarter_note(screenx + 35, 550, "e"),
+    half_note(screenx + 35, 565, "d"), 
+
+    quarter_note(screenx + 35, 520, "g"),
+    quarter_note(screenx + 35, 520, "g"),
+    quarter_note(screenx + 35, 535, "f"),
+    quarter_note(screenx + 35, 535, "f"),
+
+    quarter_note(screenx + 35, 550, "e"),
+    quarter_note(screenx + 35, 550, "e"),
+    half_note(screenx + 35, 565, "d"), 
+
+
+    quarter_note_off(screenx + 35, 580, "c"),
+    quarter_note_off(screenx + 35, 580, "c"),
+    quarter_note(screenx + 35, 520, "g"),
+    quarter_note(screenx + 35, 520, "g"),
+
+    quarter_note(screenx + 35, 505, "a"),
+    quarter_note(screenx + 35, 505, "a"),
+    half_note(screenx + 35, 520, "g"),
+
+    quarter_note(screenx + 35, 535, "f"),
+    quarter_note(screenx + 35, 535, "f"),
+    quarter_note(screenx + 35, 550, "e"),
+    quarter_note(screenx + 35, 550, "e"),
+
+    quarter_note(screenx + 35, 565, "d"),
+    quarter_note(screenx + 35, 565, "d"),
+    half_note_off(screenx + 35, 580, "c"),
+]
+
+# might use this for sound input later
+#used to hit the note
+class detector(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.radius = 15
-        self.color = (0, 0, 0)
-        self.thickness = 0
-        self.start = [x + 13, y]
-        self.end = [x + 13, y - 75]
+        super().__init__()
+        #self.image = pygame.Surface([50, 240])
+        #self.image.fill((255,0,0))
+        self.image = pygame.Surface([50,240], pygame.SRCALPHA, 32)
+        pygame.draw.line(self.image, (0, 0, 0), [25, 240], [25, 0], 2)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
-    def make(self):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
-        pygame.draw.line(screen, self.color, self.start, self.end, 2)
-
-
-class quarter_note_off:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.radius = 15
-        self.color = (0, 0, 0)
-        self.thickness = 0
-        self.start = [x + 13, y]
-        self.end = [x + 13, y - 75]
-
-    def make(self):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
-        pygame.draw.line(screen, self.color, self.start, self.end, 2)
-
-class half_note:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.radius = 15
-        self.color = (0, 0, 0)
-        self.thickness = 0
-        self.start = [x + 13, y]
-        self.end = [x + 13, y - 75]
-
-    def make(self):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
-        pygame.draw.line(screen, self.color, self.start, self.end, 2)
-
-class half_note_off:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.radius = 15
-        self.color = (0, 0, 0)
-        self.thickness = 0
-        self.start = [x + 13, y]
-        self.end = [x + 13, y - 75]
-
-    def make(self):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
-        pygame.draw.line(screen, self.color, self.start, self.end, 2)
-
+        
+detector_group = pygame.sprite.Group()
+detector_group.add(detector(175, 450))
 
 # Game loop
 running = True
+clock = pygame.time.Clock()
+note_count = 0
+timer = threading.Timer(1, all_active_note_list.add, args = (sheet_music[note_count],))
+timer.start()
+
+score = 0
+
 while running:
+    #wipe the previous movement
+    screen.fill((255,255,255))
     line_num = 0
 
-    # Iterating over the rectangle_list using
+    pygame.draw.rect(screen, (0, 0, 255), 
+                 [175, 450, 150, 250], 2)
+
     # for loop
     for line in line_start:
         # Drawing the lines 
@@ -104,26 +204,54 @@ while running:
         # Increasing the value of line_num
         # by 1 after every iteration
         line_num += 1
-    
-    note = quarter_note(300, 525).make()
-    """
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                print("Move the character forwards")
-            elif event.key == pygame.K_s:
-                print("Move the character backwards")
-            elif event.key == pygame.K_a:
-                print("Move the character left")
-            elif event.key == pygame.K_d:
-                print("Move the character right")
-"""
+
+    detector_group.draw(screen)
+
+    if(timer.is_alive() == False):
+        #make the note
+        note_count += 1
+        if(note_count < len(sheet_music)):
+            timer = threading.Timer(1, all_active_note_list.add, args = (sheet_music[note_count], ))
+            timer.start()
+
+    all_active_note_list.draw(screen)
+
+    for note in all_active_note_list:
+        note.rect.x -= 7
+        if(note.rect.x <= 110):
+            note.kill()
+
     pygame.display.update()
+    pygame.display.flip()
+    clock.tick(60)
+    time.sleep(0.01)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-
+        for note in all_active_note_list:
+            #check if note was pressed
+            if(event.type == pygame.KEYDOWN and note.rect.x >= 150 and note.rect.x <= 250):
+                if(event.key == pygame.K_t and note.key == "c"):
+                    score += 1
+                    note.kill()
+                if (event.key == pygame.K_y and note.key == "d"):
+                    score += 1
+                    note.kill()
+            # checking if key "E" was pressed
+                if( event.key == pygame.K_u and note.key == "e"):
+                    score += 1
+                    note.kill()
+            # checking if key "F" was pressed
+                if (event.key == pygame.K_i and note.key == "f"):
+                    score += 1
+                    note.kill()
+                if (event.key == pygame.K_o and note.key == "g"):
+                    score += 1
+                    note.kill()
+                if (event.key == pygame.K_p and note.key == "a"):
+                    score += 1
+                    note.kill()
 
 # Quit Pygame
 pygame.quit()
