@@ -1,6 +1,6 @@
-import pygame
 import time
 import threading
+from pygame.locals import *
 import sys
 from wcwidth import center
 
@@ -24,6 +24,7 @@ line_start = [(200, 510), #f line
               (200, 570), #b line
               (200, 600), #g line
               (200, 630), #e line
+              (200, 630)
             ]
                               
 line_end = [(screenx, 510), #f line
@@ -31,6 +32,7 @@ line_end = [(screenx, 510), #f line
             (screenx, 570), #b line
             (screenx, 600), #g line
             (screenx, 630), #e line
+            (200, 510)
             ]
 
 class quarter_note(pygame.sprite.Sprite):
@@ -101,6 +103,13 @@ class half_note_off(pygame.sprite.Sprite):
 
         self.key = key
 
+key_dict = {"c": pygame.K_q,
+            "d": pygame.K_w,
+            "e": pygame.K_e,
+            "f": pygame.K_i,
+            "g": pygame.K_o, 
+            "a": pygame.K_p}
+
 all_active_note_list = pygame.sprite.Group()
 
 sheet_music = [
@@ -163,6 +172,7 @@ sheet_music = [
 
 # might use this for sound input later
 #used to hit the note
+'''
 class detector(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -177,6 +187,12 @@ class detector(pygame.sprite.Sprite):
         
 detector_group = pygame.sprite.Group()
 detector_group.add(detector(175, 450))
+'''
+
+font = pygame.font.Font('freesansbold.ttf', 32)
+text = font.render('Perfect', True, (0,255,0))
+textRect = text.get_rect()
+textRect.center = (200,420)
 
 # Game loop
 running = True
@@ -191,9 +207,9 @@ while running:
     #wipe the previous movement
     screen.fill((255,255,255))
     line_num = 0
-
-    pygame.draw.rect(screen, (0, 0, 255), 
-                 [175, 450, 150, 250], 2)
+    #green indicator
+    pygame.draw.rect(screen, (0, 255, 0), 
+        [160, 450, 80, 240], 0)
 
     # for loop
     for line in line_start:
@@ -204,8 +220,6 @@ while running:
         # Increasing the value of line_num
         # by 1 after every iteration
         line_num += 1
-
-    detector_group.draw(screen)
 
     if(timer.is_alive() == False):
         #make the note
@@ -218,8 +232,10 @@ while running:
 
     for note in all_active_note_list:
         note.rect.x -= 7
-        if(note.rect.x <= 110):
-            note.kill()
+    if(len(all_active_note_list.sprites()) > 0):
+                note = all_active_note_list.sprites()[0]
+                if(note.rect.x <= 110):
+                    note.kill() 
 
     pygame.display.update()
     pygame.display.flip()
@@ -229,29 +245,17 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        for note in all_active_note_list:
-            #check if note was pressed
-            if(event.type == pygame.KEYDOWN and note.rect.x >= 150 and note.rect.x <= 250):
-                if(event.key == pygame.K_t and note.key == "c"):
-                    score += 1
-                    note.kill()
-                if (event.key == pygame.K_y and note.key == "d"):
-                    score += 1
-                    note.kill()
-            # checking if key "E" was pressed
-                if( event.key == pygame.K_u and note.key == "e"):
-                    score += 1
-                    note.kill()
-            # checking if key "F" was pressed
-                if (event.key == pygame.K_i and note.key == "f"):
-                    score += 1
-                    note.kill()
-                if (event.key == pygame.K_o and note.key == "g"):
-                    score += 1
-                    note.kill()
-                if (event.key == pygame.K_p and note.key == "a"):
-                    score += 1
-                    note.kill()
+
+        if (event.type == KEYDOWN):
+            if(len(all_active_note_list.sprites()) > 0):
+                note = all_active_note_list.sprites()[0]
+                if(note.rect.x >= 160 and note.rect.x <= 240):
+                    for key, value in key_dict.items():
+                        if(event.key == value and note.key == key):
+                            screen.blit(text, textRect)
+                            score += 1
+                            note.kill()
+        '''elif(event.type == KEYUP):'''
 
 # Quit Pygame
 pygame.quit()
